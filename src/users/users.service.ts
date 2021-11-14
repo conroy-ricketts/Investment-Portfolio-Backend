@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AssetType } from 'src/types/transactions';
 import { CoinGecko } from 'src/utils/CoinGecko';
+import { Finnhub } from 'src/utils/Finnhub';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,9 +11,13 @@ import { User } from './entities/user.entity';
 @Injectable()
 export class UsersService {
   private coinGecko = new CoinGecko();
+  private finnhub: Finnhub;
   constructor(
-    @InjectRepository(User) public userRepository: Repository<User>,
-  ) {}
+    @InjectRepository(User) private userRepository: Repository<User>,
+    private configService: ConfigService,
+  ) {
+    this.finnhub = new Finnhub(this.configService.get('FINNHUB_TOKEN'));
+  }
 
   async login(email: string, password: string): Promise<User> {
     const user = await this.userRepository.findOneOrFail({ email });
@@ -53,13 +60,18 @@ export class UsersService {
       return { portfolio: 0 };
     }
     const data = await this.coinGecko.getMarkets(Object.keys(map));
-
+    let stock = 0;
+    await Promise.all(
+      Object.entries(map[AssetType.STOCK]).map(async ([k, v]) => {
+        stock += (await this.finnhub.getCurrentPrice(k.toUpperCase())) * v;
+      }),
+    );
+    const crypto = Object.entries(map[AssetType.CRYPTO]).reduce(
+      (a, [k, v]) => a + (data.find((d) => d.id === k)?.current_price || 0) * v,
+      0,
+    );
     return {
-      portfolio: Object.entries(map).reduce(
-        (a, [k, v]) =>
-          a + (data.find((d) => d.id === k)?.current_price || 0) * v,
-        0,
-      ),
+      portfolio: stock + crypto,
     };
   }
 }

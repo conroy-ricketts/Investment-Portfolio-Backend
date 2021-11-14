@@ -14,7 +14,11 @@ export class CoinGecko {
   }
 
   getMarkets(ids: string[] = []) {
-    const idsString: string = ids.length ? `&ids=${ids.join('%2C')}` : '';
-    return this.request(`coins/markets?vs_currency=usd${idsString}`);
+    const idsString: string = ids.length
+      ? `&ids=${ids.join('%2C')}`
+      : '&per_page=100&page=1';
+    return this.request(
+      `coins/markets?vs_currency=usd&order=market_cap_desc${idsString}`,
+    );
   }
 }
