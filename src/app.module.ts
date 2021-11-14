@@ -24,6 +24,9 @@ const { NODE_ENV } = process.env;
         username: config.get('TYPEORM_USERNAME'),
         password: config.get('TYPEORM_PASSWORD'),
         database: config.get('TYPEORM_DATABASE'),
+        migrations: [config.get('TYPEORM_MIGRATIONS')],
+        migrationsTableName: config.get('TYPEORM_MIGRATIONS_TABLE_NAME'),
+        migrationsRun: true,
         entities: ['src/**/**.entity{.ts,.js}'],
         synchronize:
           config.get('TYPEORM_SYNCHRONIZE') === 'true' &&
