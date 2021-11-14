@@ -27,7 +27,7 @@ const { NODE_ENV } = process.env;
         entities: ['src/**/**.entity{.ts,.js}'],
         synchronize:
           config.get('TYPEORM_SYNCHRONIZE') === 'true' &&
-          config.get('NODE_ENV') !== 'production',
+          config.get('NODE_ENV').toLowerCase() !== 'production',
       }),
     }),
     TransactionsModule,
