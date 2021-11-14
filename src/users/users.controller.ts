@@ -52,4 +52,9 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
+
+  @Get(':id/portfolio')
+  getPortfolio(@Param('id') id: string) {
+    return this.usersService.getCurrentPortfolio(id);
+  }
 }

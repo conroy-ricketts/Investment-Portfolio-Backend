@@ -14,4 +14,14 @@ export class User {
 
   @OneToMany(() => Transaction, (transaction) => transaction.user)
   transactions: Transaction[];
+
+  getAssetAmountMap(): { [key: string]: number } {
+    const assetMap = {};
+
+    this.transactions.forEach((t) => {
+      assetMap[t.assetId] = (assetMap[t.assetId] || 0) + t.amount;
+    });
+
+    return assetMap;
+  }
 }
